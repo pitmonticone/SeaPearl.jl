@@ -40,7 +40,7 @@ Base.show(io::IO, so::StateObject{T}) where {T} = write(io, "StateObject{", stri
 """
     StateEntry{T}(value::T, object::StateObject{T})
 
-An entry that can be stacked in the trailer, containing the former `value of the object, and a reference to
+An entry that can be stacked in the trailer, containing the former `value` of the object, and a reference to
 the `object` so that it can be restored by the trailer.
 """
 struct StateEntry{T} <: AbstractStateEntry
