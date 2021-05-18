@@ -4,6 +4,9 @@ The trailer is the object that keeps track of anything you want to keep track of
 Some objects will take a `trailer` as a parameter in their constructor. When it does, it means that their state
 can be saved and restored on demand using the functions described below.
 
+```@index
+Pages = ["trailer.md"]
+```
 ## State manipulation
 
 Those functions are used to change the current state, save and or restore it.
@@ -17,6 +20,7 @@ using the trailer.
 ```@docs
 SeaPearl.StateObject
 SeaPearl.StateEntry
+SeaPearl.Trailer()
 SeaPearl.trail!
 SeaPearl.setValue!
 SeaPearl.saveState!
