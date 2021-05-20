@@ -1,4 +1,5 @@
-# SeaPearl: A Julian hybrid CP solver enhanced by Reinforcement Learning techniques
+![SeaPearl.jl](assets/header.png)
+### A Julian hybrid CP solver enhanced with Reinforcement Learning
 
 SeaPearl was created as a way for researchers to have a constraint programming solver that can
 integrate seamlessly with Reinforcement Learning technologies, using them as heuristics for value selection during branching.

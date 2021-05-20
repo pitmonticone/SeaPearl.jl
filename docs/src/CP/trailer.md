@@ -20,7 +20,7 @@ using the trailer.
 ```@docs
 SeaPearl.StateObject
 SeaPearl.StateEntry
-SeaPearl.Trailer()
+SeaPearl.Trailer
 SeaPearl.trail!
 SeaPearl.setValue!
 SeaPearl.saveState!

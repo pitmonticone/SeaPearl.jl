@@ -25,106 +25,84 @@ SeaPearl can be used either as a classic CP solver with predefined variable and 
 ### SeaPearl as a classic CP solver: 
 To use SeaPearl as a classic CP solver, one needs to: 
 
-- create a variable selection heuristic: 
+1. create a variable selection heuristic.
+2. create a value selection heuristic.
+3. create a Constraint Programming Model.
+4. _optionnaly_, add an objective function to your model. 
+5. solve your model.
 
 ```julia
+# Variable selection heuristic setup
 YourVariableSelectionHeuristic{TakeObjective} <: SeaPearl.AbstractVariableSelection{TakeObjective}
-```
 
-- create a value selection heuristic: 
-
-```julia
+# Value selection heuristic setup
 BasicHeuristic <: ValueSelection
-```
 
-- create a Constraint Programming Model: 
-
-```julia
+# CP Model setup
 trailer = SeaPearl.Trailer()
 model = SeaPearl.CPModel(trailer)
 
-#create variable: 
 SeaPearl.addVariable!(...)
 
-#add constraints: 
 push!(model.constraints, SeaPearl.AbstractConstraint(...))
 
-#add optionnal objective function: 
+# Add optionnal objective function: 
 model.objective = ObjectiveVar
-```
 
-- solve your model:
-
-```julia
+# Model resolution
 SeaPearl.search!(model, SeaPearl.DFSearch, YourVariableSelectionHeuristic, BasicHeuristic)
 ```
 
 ### SeaPearl as a RL-driven CP solver: 
 To use SeaPearl as a RL-driven CP solver, one needs to: 
 
-- declare a variable selection heuristic: 
+1. declare a variable selection heuristic.
+1. declare a value selection learnedheuristic.
+1. _optionnaly_, declare some classic value selection heuristic for benchmarking purposes.
+1. define an agent.
+1. _optionnaly_, declare a custom reward.
+1. _optionnaly_, declare a custom StateRepresentation (instead of the Default tripartite-graph representation).
+1. _optionnaly_, declare a custom featurization for the StateRepresentation.
+1. create a generator for your given problem, that will create different instances of the specific problem used during the learning process. 
+1. set a number of training epochs, declare an evaluator, a Strategy, a metric for benchmarking.
+1. launch the training.
+1. solve your model on other instances.
 
 ```julia
+# Variable selection heuristic setup
 CustomVariableSelectionHeuristic{TakeObjective} <: SeaPearl.AbstractVariableSelection{TakeObjective}
-```
 
-- declare a value selection learnedheuristic: 
-
-```julia
+# Value selection heuristic setup
 LearnedHeuristic{SR<:AbstractStateRepresentation, R<:AbstractReward, A<:ActionOutput} <: ValueSelection
-```
 
-- *optionnaly*, declare some classic value selection heuristic for benchmarking purposes
-
-```julia
+# Deterministic value selection heuristic setup
 basicHeuristic = SeaPearl.BasicHeuristic((x; cpmodel) -> your_function(...))
-```
 
-- define an agent: 
-
-```julia
+# Agent setup
 agent = RL.Agent(
 policy=(...),
 trajectory=(...),
 )
-```
 
--  *optionnaly*, declare a custom reward: 
-
-```julia
+# Reward function setup
 CustomReward <: SeaPearl.AbstractReward 
-```
 
--  *optionnaly*, declare a custom StateRepresentation ( instead of the Default tripartite-graph representation ): 
-
-```julia
+# Problem representation setup
 CustomStateRepresentation <: SeaPearl.AbstractStateRepresentation
-```
 
--  *optionnaly*, declare a custom featurization for the StateRepresentation: 
-
-```julia
+# Node features setup
 CustomFeaturization <: SeaPearl.AbstractFeaturization
-```
 
--  create a generator for your given problem, that will create different instances of the specific problem used during the learning process. 
-
-```julia
+# Problem generator setup
 CustomProblemGenerator <: AbstractModelGenerator
-```
 
-- set a number of training epochs, declare an evaluator, a Strategy, a metric for benchmarking
-
-```julia
+# Training setup
 nb_epochs = 3000
 CustomStrategy <: SearchStrategy #or use predefined one: SeaPearl.DFSearch
 CustomEvaluator <: AbstractEvaluator #or use predefined one: SeaPearl.SameInstancesEvaluator(...)
 function CustomMetricsFun
-```
 
-- launch the training:  
-
-```julia
+# Training launch
 bestsolutions, nodevisited,timeneeded, eval_nodevisited, eval_timeneeded = SeaPearl.train!(
     valueSelectionArray = [learnedHeuristic, basicHeuristic], 
     generator = CustomProblemGenerator,
@@ -134,11 +112,8 @@ bestsolutions, nodevisited,timeneeded, eval_nodevisited, eval_timeneeded = SeaPe
     metricsFun = CustomMetricsFun,
     evaluator = CustomEvaluator
 )
-```
 
-- solve your model:
-
-```julia
+# Test launch
 SeaPearl.search!(model, SeaPearl.DFSearch, CustomVariableSelectionHeuristic, LearnedHeuristic)
 ```
 
@@ -155,7 +130,7 @@ To contribute to Sealpearl, follow these steps:
 1. Fork this repository.
 2. Push your changes on your fork.
 3. Create a pull request, and explain us what modifications you want to bring to SeaPearl.
-4. _optionnaly_: Link the issue related to your PR.
+4. _optionnaly_, Link the issue related to your PR.
 
 Alternatively see the GitHub documentation on [creating a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
 

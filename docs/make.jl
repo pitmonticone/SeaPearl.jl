@@ -3,7 +3,8 @@ using SeaPearl
 
 format = Documenter.HTML(
     prettyurls = get(ENV, "CI", nothing) == "true",
-    sidebar_sitename = false
+    sidebar_sitename = true,
+    assets = [joinpath("assets", "favicon.ico")]
 )
 makedocs(
     sitename = "SeaPearl.jl",
