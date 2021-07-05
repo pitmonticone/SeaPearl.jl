@@ -26,7 +26,8 @@ function train!(;
         out_solver::Bool=false,
         verbose::Bool=true,
         evaluator::Union{Nothing, AbstractEvaluator},
-        metrics::Union{Nothing,AbstractMetrics}=nothing
+        metrics::Union{Nothing,AbstractMetrics}=nothing,
+        seed=nothing
     ) where{ T <: ValueSelection, S <: SearchStrategy}
 
     if isa(valueSelectionArray, T)
@@ -54,6 +55,7 @@ function train!(;
         verbose;
         metrics=metrics,
         evaluator=evaluator,
+        seed=seed
     )
 
     for valueSelection in valueSelectionArray

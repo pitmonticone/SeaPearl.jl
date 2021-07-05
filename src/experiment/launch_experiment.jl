@@ -34,12 +34,13 @@ function launch_experiment!(
         out_solver::Bool,
         verbose::Bool;
         metrics::Union{Nothing, AbstractMetrics}=nothing,
-        evaluator::Union{Nothing, AbstractEvaluator}=SameInstancesEvaluator(valueSelectionArray,generator)
+        evaluator::Union{Nothing, AbstractEvaluator}=SameInstancesEvaluator(valueSelectionArray,generator),
+        seed=nothing
     ) where{T <: ValueSelection, S <: SearchStrategy}
 
     nbHeuristics = length(valueSelectionArray)
 
-     #get the type of CPmodel ( does it contains an objective )
+    #get the type of CPmodel ( does it contains an objective )
     trailer = Trailer()
     model = CPModel(trailer)
     fill_with_generator!(model, generator) 
@@ -59,7 +60,7 @@ function launch_experiment!(
 
         empty!(model)
 
-        fill_with_generator!(model, generator)
+        fill_with_generator!(model, generator; seed=seed)
 
         for j in 1:nbHeuristics
             reset_model!(model)

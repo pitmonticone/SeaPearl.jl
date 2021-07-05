@@ -9,14 +9,14 @@ end
 
 """
     fill_with_generator!(cpmodel::CPModel, gen::GraphColoringGenerator)
+
 Fill a CPModel with the variables and constraints generated. We fill it directly instead of
 creating temporary files for efficiency purpose.
 
-This generator create graps for the NQueens problem.
+This generator create graps for the latin square problem.
 
 """
-
-function proper_move(A::Matrix{Int},x::Int,y::Int,z::Int,v::Int)
+function proper_move!(A::Matrix{Int},x::Int,y::Int,z::Int,v::Int)
     z2 = A[x,y]
     if z2==v
         A[x,y]=z
@@ -26,7 +26,7 @@ function proper_move(A::Matrix{Int},x::Int,y::Int,z::Int,v::Int)
         A[x,y] = z
         A[x,y2]= z2
         A[x2,y]= z2
-        proper_move(A,x2,y2,v,z2)
+        proper_move!(A,x2,y2,v,z2)
     end
 end
 
@@ -45,7 +45,7 @@ function fill_with_generator!(cpmodel::CPModel, gen::LatinGenerator; seed=nothin
     end
     for i in 1:N^3
         x,y,z = rand(1:N,3)
-        proper_move(A,x,y,z,z)
+        proper_move!(A,x,y,z,z)
     end
     B = copy(A)
     n = floor(Int,p*N^2)
@@ -64,9 +64,11 @@ function fill_with_generator!(cpmodel::CPModel, gen::LatinGenerator; seed=nothin
             if B[i,j]>0 push!(cpmodel.constraints,SeaPearl.EqualConstant(puzzle[i,j], B[i,j], cpmodel.trailer)) end
         end
     end
+
     for i in 1:N
         push!(cpmodel.constraints, SeaPearl.AllDifferent(puzzle[i,:], cpmodel.trailer))
         push!(cpmodel.constraints, SeaPearl.AllDifferent(puzzle[:,i], cpmodel.trailer))
     end
+
     return nothing
 end
