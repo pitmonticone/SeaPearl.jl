@@ -84,7 +84,6 @@ function (valueSelection::LearnedHeuristic)(PHASE::Type{DecisionPhase}, model::C
     # domain change metrics, set before reward is updated
     set_metrics!(PHASE, valueSelection.search_metrics, model, x)
     set_reward!(PHASE, valueSelection, model)
-    println("on fait le choix de brancher sur la variable "*x.id)
     push!(model.adhocInfo[end],(x.id,parse(Int,split(x.id,'_')[2])))
     env = get_observation!(valueSelection, model, x)
 

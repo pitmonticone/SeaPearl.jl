@@ -87,24 +87,24 @@ function set_reward!(::Type{DecisionPhase}, lh::LearnedHeuristic{SR, TsptwReward
     SR <: AbstractStateRepresentation,
     A <: ActionOutput
 }
-    println("on rentre dans la fonction set reward decision phase")
+    #println("on rentre dans la fonction set reward decision phase")
     n = size(lh.current_state.dist, 1)
     if isa(model.adhocInfo[end],Array)&&(!isempty(model.adhocInfo[end]))
         s = model.adhocInfo[end][end][1] #Si on ne met pas de -1 la variable n'est pas bound
         current = model.adhocInfo[end][end][2]
-        println("on regarde le dernier choix de variable de branchement")
-        println("elle est bien bound : "*string(isbound(model.variables[s])))
+        #println("on regarde le dernier choix de variable de branchement")
+        #println("elle est bien bound : "*string(isbound(model.variables[s])))
         if isbound(model.variables["a_"*string(current)])
-            println("on compte le reward pour a"*string(current))
+            #println("on compte le reward pour a"*string(current))
             a_i = assignedValue(model.variables["a_"*string(current)])
             v_i = assignedValue(model.variables["v_"*string(current)])
             last_dist = lh.current_state.dist[v_i, a_i] * lh.reward.max_dist
-            println(last_dist)
+            #println(last_dist)
             lh.reward.value += lh.reward.normalizer* (lh.reward.positiver - last_dist)
-            println(lh.reward.normalizer* (lh.reward.positiver - last_dist))
+            #println(lh.reward.normalizer* (lh.reward.positiver - last_dist))
         end
     else lh.reward.value+=0
-        println("encore aucune variable choisie on ne rajoute pas de reward")
+        #println("encore aucune variable choisie on ne rajoute pas de reward")
     end
 end
 
@@ -125,9 +125,9 @@ function set_reward!(::Type{EndingPhase}, lh::LearnedHeuristic{SR, TsptwReward, 
         lh.reward.value -= 10/lh.search_metrics.total_steps
     end
 
-    print("reward EnfingPhase avec symbol ")
-    println(symbol)
-    println(lh.reward.value)
-    println()
+    #print("reward EnfingPhase avec symbol ")
+    #println(symbol)
+    #println(lh.reward.value)
+    #println()
     # lh.reward.value += 1.
 end
