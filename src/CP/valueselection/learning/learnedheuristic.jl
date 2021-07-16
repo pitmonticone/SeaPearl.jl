@@ -84,7 +84,7 @@ function (valueSelection::LearnedHeuristic)(PHASE::Type{DecisionPhase}, model::C
     # domain change metrics, set before reward is updated
     set_metrics!(PHASE, valueSelection.search_metrics, model, x)
     set_reward!(PHASE, valueSelection, model)
-    push!(model.adhocInfo[end],(x.id,parse(Int,split(x.id,'_')[2])))
+    #push!(model.adhocInfo[end],(x.id,parse(Int,split(x.id,'_')[2])))
     env = get_observation!(valueSelection, model, x)
 
     #println("Decision  ", obs.reward, " ", obs.terminal, " ", obs.legal_actions, " ", obs.legal_actions_mask)

@@ -62,7 +62,7 @@ update_representation!(sr::AbstractStateRepresentation, m::CPModel, x::AbstractI
 
 """
     trajectoryState(sr::AbstractStateRepresentation{TS})
-    
+
 Return a TrajectoryState based on the present state represented by `sr`.
 
 The type of the returned object is defined by the `TS` parametric type defined in `sr`.
@@ -104,3 +104,4 @@ global_feature_length(sr::Type{<:FeaturizedStateRepresentation}) = 0
 include("default/defaulttrajectorystate.jl")
 include("default/defaultstaterepresentation.jl")
 include("tsptw/tsptwstaterepresentation.jl")
+include("graphcoloring/graphcoloringrepresentation.jl")
