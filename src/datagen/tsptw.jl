@@ -9,12 +9,12 @@ end
 TsptwGenerator(n_city::Int, grid_size::Int, max_tw_gap::Int, max_tw::Int) = TsptwGenerator(n_city, grid_size, max_tw_gap, max_tw, true)
 
 """
-    fill_with_generator!(cpmodel::CPModel, gen::TsptwGenerator)::CPModel    
+    fill_with_generator!(cpmodel::CPModel, gen::TsptwGenerator)::CPModel
 
-Fill a CPModel with the variables and constraints generated. We fill it directly instead of 
+Fill a CPModel with the variables and constraints generated. We fill it directly instead of
 creating temporary files for efficiency purpose !
 
-It is the same generator as used in 
+It is the same generator as used in
 "Combining Reinforcement Learning and Constraint Programming for Combinatorial Optimization":
 Quentin Cappart, Thierry Moisan, Louis-Martin Rousseau, Isabeau Prémont-Schwarz & Andre Cire
 https://arxiv.org/abs/2006.01610
@@ -63,7 +63,7 @@ function fill_with_generator!(cpmodel::CPModel, gen::TsptwGenerator; seed=nothin
         end
     end
 
-    cpmodel.adhocInfo = dist, timeWindows, hcat(x_pos, y_pos), gen.grid_size
+    cpmodel.adhocInfo = dist, timeWindows, hcat(x_pos, y_pos), gen.grid_size, []
 
 
     max_upper_tw = Base.maximum(timeWindows) * 2
@@ -87,7 +87,7 @@ function fill_with_generator!(cpmodel::CPModel, gen::TsptwGenerator; seed=nothin
         end
         addVariable!(cpmodel, c[i]; branchable=false)
     end
-    
+
 
     ## Intermediaries
     d = [IntVar(0, gen.grid_size * 2, "d_"*string(i), cpmodel.trailer) for i in 1:gen.n_city] # d[v_i, a_i]

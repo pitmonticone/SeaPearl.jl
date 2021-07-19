@@ -80,7 +80,7 @@ function get_observation!(lh::LearnedHeuristic, model::CPModel, x::AbstractIntVa
     # synchronize state:
     sync_state!(lh, model, x)
     state = trajectoryState(lh.current_state)
-
+    #SeaPearl.print_tripartite(lh.current_state)
     if !wears_mask(lh)
         return unmaskedCPEnv(reward, done, state, action_space_index)
     end
@@ -132,6 +132,7 @@ end
 function action_to_value(vs::LearnedHeuristic{SR, R, VariableOutput}, action::Int64, state::AbstractTrajectoryState, model::CPModel) where {SR <: TsptwStateRepresentation, R}
     return from_order_to_id(state, action, SR)
 end
+
 
 """
     action_to_value(vs::LearnedHeuristic{SR, R, FixedOutput}, action::Int64, state::AbstractArray, model::CPModel)

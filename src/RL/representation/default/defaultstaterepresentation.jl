@@ -1,5 +1,5 @@
 include("cp_layer/cp_layer.jl")
-
+#using GraphPlot
 """
     DefaultStateRepresentation{F, TS}
 
@@ -33,7 +33,7 @@ function DefaultTrajectoryState(sr::DefaultStateRepresentation{F, DefaultTraject
         throw(ErrorException("Unable to build a DefaultTrajectoryState, when the branching variable is nothing."))
     end
     adj = Matrix(adjacency_matrix(sr.cplayergraph))
-    fg = isnothing(sr.globalFeatures) ? 
+    fg = isnothing(sr.globalFeatures) ?
         FeaturedGraph(adj; nf=sr.nodeFeatures) : FeaturedGraph(adj; nf=sr.nodeFeatures, gf=sr.globalFeatures)
     return DefaultTrajectoryState(fg, sr.variableIdx, sr.allValuesIdx)
 end
@@ -84,3 +84,19 @@ Returns the length of the feature vector, for the `DefaultFeaturization`.
 feature_length(::Type{<:FeaturizedStateRepresentation{DefaultFeaturization, TS}}) where TS = 3
 
 DefaultStateRepresentation(m::CPModel) = DefaultStateRepresentation{DefaultFeaturization, DefaultTrajectoryState}(m::CPModel)
+
+"""
+
+function print_tripartite(sr::DefaultStateRepresentation)
+    cpmodel = sr.cplayergraph
+    n = cpmodel.totalLength
+    nodefillc = []
+    for id in 1:n
+        v = cpmodel.idToNode[id]
+        if isa(v, VariableVertex) push!(nodefillc,"red")
+        elseif isa(v, ValueVertex) push!(nodefillc,"blue")
+        else  push!(nodefillc,"black") end
+    end
+    display(gplot(cpmodel;nodefillc=nodefillc))
+end
+"""
