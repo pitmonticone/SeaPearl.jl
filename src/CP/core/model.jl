@@ -3,15 +3,18 @@ const Solution = Dict{String, Union{Int, Bool, Set{Int}}}
 
 #TODO add documentation for BeforeRestart
 mutable struct Statistics
+    infeasibleStatusPerVariable             ::Dict{String, Int}
     numberOfNodes                           ::Int
     numberOfSolutions                       ::Int
     numberOfInfeasibleSolutions             ::Int
     numberOfSolutionsBeforeRestart          ::Int
     numberOfInfeasibleSolutionsBeforeRestart::Int
     numberOfNodesBeforeRestart              ::Int
-    solutions                               ::Vector{Solution}
+    AccumulatedRewardBeforeReset            ::Float32
+    solutions                               ::Vector{Union{Nothing,Solution}}
     nodevisitedpersolution                  ::Vector{Int}
-    objectives                              ::Union{Nothing, Vector{Int}}
+    objectives                              ::Union{Nothing, Vector{Union{Nothing,Int}}}
+    lastPruning                             ::Union{Nothing, Int}
 end
 
 mutable struct Limit
@@ -34,7 +37,7 @@ or filled by an `AbstractModelGenerator`.
 mutable struct CPModel
     variables               ::Dict{String, AbstractVar}
     branchable              ::Dict{String, Bool}
-    constraints             ::Array{Constraint}
+    constraints             ::Array{Constraint} 
     trailer                 ::Trailer
     objective               ::Union{Nothing, AbstractIntVar}
     objectiveBound          ::Union{Nothing, Int}
@@ -42,7 +45,7 @@ mutable struct CPModel
     limit                   ::Limit
     knownObjective           ::Union{Nothing,Int64}
     adhocInfo               ::Any
-    CPModel(trailer) = new(Dict{String, AbstractVar}(), Dict{String, Bool}(), Constraint[], trailer, nothing, nothing, Statistics(0, 0, 0, 0, 0, 0, Solution[],Int[],nothing), Limit(nothing, nothing), nothing)
+    CPModel(trailer) = new(Dict{String, AbstractVar}(), Dict{String, Bool}(), Constraint[], trailer, nothing, nothing, Statistics(Dict{String, Int}(), 0,0, 0, 0, 0, 0, 0, Solution[],Int[], nothing, nothing), Limit(nothing, nothing), nothing)
 end
 
 CPModel() = CPModel(Trailer())
@@ -58,7 +61,8 @@ function addVariable!(model::CPModel, x::AbstractVar; branchable=true)
     @assert !haskey(model.variables, x.id) "The id of the variable must be unique"
 
     @assert !branchable || typeof(x) <: Union{AbstractIntVar, AbstractBoolVar} "You can only branch on Boolean and Integer variables"
-
+    
+    model.statistics.infeasibleStatusPerVariable[id(x)]=0
     model.branchable[x.id] = branchable
     model.variables[x.id] = x
 end
@@ -76,6 +80,17 @@ end
 function addKnownObjective!(model::CPModel, knownObective::Int64)
     model.knownObjective = knownObective
 end
+
+function addConstraint!(model::CPModel,constraint::Constraint)
+    push!(model.constraints,constraint)
+    for var in variablesArray(constraint)
+        if haskey(model.branchable, id(var))
+            @assert haskey(model.statistics.infeasibleStatusPerVariable, id(var)) "You forget to add the variable $(id(var)) to the model"
+            model.statistics.infeasibleStatusPerVariable[id(var)]+=1
+        end
+    end   
+end
+
 
 """
     function is_branchable(model::CPModel, x::AbstractVar)
@@ -129,15 +144,38 @@ function triggerFoundSolution!(model::CPModel)
     for (k, x) in model.variables
         solution[k] = assignedValue(x)
     end
-    push!(model.statistics.solutions, solution)
+    if !(solution in model.statistics.solutions)   #probably not efficient but necessary
+        push!(model.statistics.solutions, solution)
+        push!(model.statistics.nodevisitedpersolution,model.statistics.numberOfNodes)
+        if !isnothing(model.objective)
+            @assert !isnothing(model.statistics.objectives)   "did you used SeaPearl.addObjective! to declare your objective function ? "
+            push!(model.statistics.objectives, assignedValue(model.objective))
+            tightenObjective!(model)
+        end
+    end
+end
+"""
+    triggerInfeasible!(constraint::Constraint, model::CPModel)
+
+this function increments by one the statistic infeasibleStatusPerVariable for each variable involved in the constraint. infeasibleStatusPerVariable
+keeps in track for each variable the number of times the variable was involved in a constraint that led to an infeasible state during a fixpoint. This statistic 
+is used by the failure-based variable selection heuristic. 
+"""
+function triggerInfeasible!(constraint::Constraint, model::CPModel)
+    for var in variablesArray(constraint)
+        if haskey(model.branchable, id(var))
+            model.statistics.infeasibleStatusPerVariable[id(var)]+=1
+        end
+    end
+    push!(model.statistics.solutions, nothing)
     push!(model.statistics.nodevisitedpersolution,model.statistics.numberOfNodes)
 
     if !isnothing(model.objective)
         @assert !isnothing(model.statistics.objectives)   "did you used SeaPearl.addObjective! to declare your objective function ? "
-        push!(model.statistics.objectives, assignedValue(model.objective))
-        tightenObjective!(model)
+        push!(model.statistics.objectives, nothing)
     end
 end
+
 
 """
     tightenObjective!(model::CPModel)
@@ -172,13 +210,16 @@ function Base.isempty(model::CPModel)::Bool
         && isnothing(model.objectiveBound)
         && isempty(model.statistics.solutions)
         && isempty(model.statistics.nodevisitedpersolution)
+        && isempty(model.statistics.infeasibleStatusPerVariable)
         && isnothing(model.statistics.objectives)
+        && isnothing(model.statistics.lastPruning)
         && model.statistics.numberOfNodes == 0
         && model.statistics.numberOfSolutions == 0
         && model.statistics.numberOfInfeasibleSolutions == 0
         && model.statistics.numberOfInfeasibleSolutionsBeforeRestart == 0
         && model.statistics.numberOfSolutionsBeforeRestart == 0
         && model.statistics.numberOfNodesBeforeRestart == 0
+        && model.statistics.AccumulatedRewardBeforeReset == 0
         && isnothing(model.limit.numberOfNodes)
         && isnothing(model.limit.numberOfSolutions)
         && isnothing(model.knownObjective)
@@ -200,13 +241,16 @@ function Base.empty!(model::CPModel)
     model.objectiveBound = nothing
     empty!(model.statistics.solutions)
     empty!(model.statistics.nodevisitedpersolution)
+    empty!(model.statistics.infeasibleStatusPerVariable)
     model.statistics.objectives = nothing
+    model.statistics.lastPruning = nothing
     model.statistics.numberOfNodes = 0
     model.statistics.numberOfSolutions = 0
     model.statistics.numberOfInfeasibleSolutions = 0
     model.statistics.numberOfInfeasibleSolutionsBeforeRestart = 0
     model.statistics.numberOfSolutionsBeforeRestart = 0
     model.statistics.numberOfNodesBeforeRestart = 0
+    model.statistics.AccumulatedRewardBeforeReset = 0
     model.limit.numberOfNodes = nothing
     model.limit.numberOfSolutions = nothing
     model.knownObjective = nothing
@@ -226,16 +270,22 @@ function reset_model!(model::CPModel)
     model.objectiveBound = nothing
     empty!(model.statistics.solutions)
     empty!(model.statistics.nodevisitedpersolution)
+    for (key, value) in model.statistics.infeasibleStatusPerVariable
+        model.statistics.infeasibleStatusPerVariable[key]=length(getOnDomainChange(model.variables[key]))  #the degree is reset to the initial value : the number of constraints the variable is involved in. 
+    end   
     if !isnothing(model.objective)
         @assert !isnothing(model.statistics.objectives)   "did you used SeaPearl.addObjective! to declare your objective function ?"
         empty!(model.statistics.objectives)
     end
+    model.statistics.lastPruning = nothing
     model.statistics.numberOfNodes = 0
     model.statistics.numberOfSolutions = 0
     model.statistics.numberOfInfeasibleSolutions = 0
     model.statistics.numberOfInfeasibleSolutionsBeforeRestart = 0
     model.statistics.numberOfSolutionsBeforeRestart = 0
     model.statistics.numberOfNodesBeforeRestart = 0
+    model.statistics.AccumulatedRewardBeforeReset = 0
+
 end
 
 """
@@ -246,6 +296,7 @@ the restart criteria.
 """
 function restart_search!(model::CPModel)
     restoreInitialState!(model.trailer)
+    model.statistics.lastPruning = nothing
     model.statistics.numberOfInfeasibleSolutionsBeforeRestart = 0
     model.statistics.numberOfSolutionsBeforeRestart = 0
     model.statistics.numberOfNodesBeforeRestart = 0
@@ -280,3 +331,4 @@ function nb_boundvariables(model::CPModel)
     end
     return nb
 end
+
