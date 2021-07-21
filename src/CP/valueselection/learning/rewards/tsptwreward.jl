@@ -89,9 +89,12 @@ function set_reward!(::Type{DecisionPhase}, lh::LearnedHeuristic{SR, TsptwReward
 }
     #println("on rentre dans la fonction set reward decision phase")
     n = size(lh.current_state.dist, 1)
-    if isa(model.adhocInfo[end],Array)&&(!isempty(model.adhocInfo[end]))
-        s = model.adhocInfo[end][end][1] #Si on ne met pas de -1 la variable n'est pas bound
-        current = model.adhocInfo[end][end][2]
+    if !isnothing(model.statistics.lastVar)
+        println("wow")
+        x = model.statistics.lastVar
+        s = x.id
+        current = parse(Int,split(x.id,'_')[2])
+        println(current)
         #println("on regarde le dernier choix de variable de branchement")
         #println("elle est bien bound : "*string(isbound(model.variables[s])))
         if isbound(model.variables["a_"*string(current)])
