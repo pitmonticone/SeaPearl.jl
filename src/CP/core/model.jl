@@ -15,7 +15,7 @@ mutable struct Statistics
     nodevisitedpersolution                  ::Vector{Int}
     objectives                              ::Union{Nothing, Vector{Union{Nothing,Int}}}
     lastPruning                             ::Union{Nothing, Int}
-    lastVar                                 ::Union{Nothing, SeaPearl.AbstractIntVar} #last var on which we branched
+    lastVar                                 ::Union{Nothing, AbstractIntVar} #last var on which we branched
 end
 
 mutable struct Limit
