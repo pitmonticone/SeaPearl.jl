@@ -2,7 +2,7 @@
 
     @testset "SameInstancesEvaluator constructor" begin
         generator = SeaPearl.HomogenousGraphColoringGenerator(10, 0.1)
-       
+
         my_heuristic(x::SeaPearl.IntVar; cpmodel=nothing) = minimum(x.domain)
         valueheuristic = SeaPearl.BasicHeuristic(my_heuristic)
         valueSelectionArray = [valueheuristic]
@@ -17,17 +17,17 @@
     end
 
     @testset "evaluate(::SameInstancesEvaluator)" begin
-        
+
         generator = SeaPearl.HomogenousGraphColoringGenerator(10, 0.1)
-        
+
         my_heuristic(x::SeaPearl.IntVar; cpmodel=nothing) = minimum(x.domain)
         valueheuristic = SeaPearl.BasicHeuristic(my_heuristic)
         valueSelectionArray = [valueheuristic]
-        evaluator = SeaPearl.SameInstancesEvaluator(valueSelectionArray,generator; seed=nothing, evalFreq = 50, nbInstances = 2)
+        evaluator = SeaPearl.SameInstancesEvaluator(valueSelectionArray,generator; seed=1, evalFreq = 50, nbInstances = 2)
 
         variableheuristic = SeaPearl.MinDomainVariableSelection{false}()
 
         SeaPearl.evaluate(evaluator, variableheuristic, SeaPearl.DFSearch())
-        @test evaluator.metrics[1,1].nodeVisited[1] == [12, 20, 21, 22, 23]
+        @test evaluator.metrics[1,1].nodeVisited[1] == [12, 23]
     end
 end

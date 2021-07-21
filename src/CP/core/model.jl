@@ -281,7 +281,7 @@ function reset_model!(model::CPModel)
         empty!(model.statistics.objectives)
     end
     model.statistics.lastPruning = nothing
-    model.statistics.lastVar
+    model.statistics.lastVar = nothing
     model.statistics.numberOfNodes = 0
     model.statistics.numberOfSolutions = 0
     model.statistics.numberOfInfeasibleSolutions = 0

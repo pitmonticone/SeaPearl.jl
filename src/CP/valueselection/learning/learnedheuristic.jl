@@ -83,7 +83,6 @@ be used in the other set_reward! function as the reward of the last action will 
 function (valueSelection::LearnedHeuristic)(PHASE::Type{DecisionPhase}, model::CPModel, x::Union{Nothing, AbstractIntVar})
     # domain change metrics, set before reward is updated
     set_metrics!(PHASE, valueSelection.search_metrics, model, x)
-
     set_reward!(PHASE, valueSelection, model)
     model.statistics.lastVar = x
     #push!(model.adhocInfo[end],(x.id,parse(Int,split(x.id,'_')[2])))
