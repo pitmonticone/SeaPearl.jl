@@ -11,7 +11,7 @@
         metrics::Union{Nothing,AbstractMetrics}=nothing
     ) where{ T <: ValueSelection, S <: SearchStrategy}
 
-Training the given LearnedHeuristics and using the Basic ones to compare performances. 
+Train the given LearnedHeuristics and use the Basic ones to compare performances. 
 This function managed the training mode of the LearnedHeuristic before and after a call to `launch_experiment!`.
 
 The function return arrays containing scores, time needed and numbers of nodes visited on each episode for every heuristic

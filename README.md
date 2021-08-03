@@ -94,7 +94,7 @@ eval_strategy=eval_strategy,
 variableHeuristic=variableSelection,
 out_solver = true,
 verbose = true,
-evaluator=SeaPearl.SameInstancesEvaluator(valueSelectionArray,tsptw_generator; evalFreq = evalFreq, nbInstances = nbInstances, evalTimeOut = evalTimeOut),
+evaluator=SeaPearl.SameInstancesEvaluator(valueSelectionArray,tsptw_generator; nbInstances = nbInstances, evalTimeOut = evalTimeOut),
 restartPerInstances = restartPerInstances
 )
 ```

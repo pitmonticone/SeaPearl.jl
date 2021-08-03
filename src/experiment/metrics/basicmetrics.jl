@@ -34,7 +34,7 @@ mutable struct BasicMetrics{O<:AbstractTakeObjective, H<:ValueSelection} <: Abst
     scores::Union{Nothing,Vector{Vector{Union{Nothing,Float32}}}}
     totalReward::Union{Nothing,Vector{Float32}}
     loss::Union{Nothing,Vector{Float32}}
-    meanOver::Int64
+    meanOver::Int64 #TODO remove obsolete attribute 
     nbEpisodes::Int64
 
     BasicMetrics{O,H}(heuristic,meanOver) where {O,H}= new{O, H}(heuristic,Vector{Vector{Int64}}(),Float32[],Float32[], Float32[], O==TakeObjective ? Vector{Vector{Float32}}() : nothing, (H == BasicHeuristic) ? nothing : Float32[], (H == BasicHeuristic) ? nothing : Float32[], meanOver,0)

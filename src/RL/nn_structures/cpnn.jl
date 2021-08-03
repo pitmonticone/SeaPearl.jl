@@ -8,6 +8,9 @@
 
 This structure is here to provide a flexible way to create a nn model which respect this approach:
 Making modification on the graph, then extract one node feature and modify it.
+
+This model is made to efficiently handle value selection with fix action space size. 
+
 """
 Base.@kwdef struct CPNN <: NNStructure
     graphChain::Flux.Chain = Flux.Chain()
@@ -18,7 +21,12 @@ end
 
 # Enable the `|> gpu` syntax from Flux
 Flux.@functor CPNN
+"""
+         (nn::CPNN)(states::BatchedDefaultTrajectoryState)
 
+Forward-pass of the BatchedDefaultTrajectoryState in the Neural-network model. ( GNN + Dense ) 
+This structure provides an efficiant way to compute several forward-pass in parallel. 
+"""
 function (nn::CPNN)(states::BatchedDefaultTrajectoryState)
 
     variableIdx = states.variableIdx

@@ -1,5 +1,19 @@
 abstract type AbstractEvaluator end
 
+
+"""
+    mutable struct SameInstancesEvaluator <: AbstractEvaluator
+
+SameInstancesEvaluator defines _nbInstances_ intances from the same generator distribution on which several searches
+will be executed along the training.
+
+# Fields
+
+    instances::Union{Array{CPModel}, Nothing}               ->  Array containing generated evaluation instances
+    metrics::Union{Matrix{<:AbstractMetrics}, Nothing}      ->  Array(nb instances, nbHeuristics) containing evaluation metrics 
+    nbInstances::Int64                                      ->  Number of evaluation instances
+    nbHeuristics::Union{Int64, Nothing}                     ->  Number of evaluated heuristics, including trained and classic ones
+"""
 mutable struct SameInstancesEvaluator <: AbstractEvaluator
     instances::Union{Array{CPModel}, Nothing}
     metrics::Union{Matrix{<:AbstractMetrics}, Nothing} 
@@ -23,6 +37,11 @@ function SameInstancesEvaluator(valueSelectionArray::Array{H, 1}, generator::Abs
     SameInstancesEvaluator(instances, metrics, evalFreq, nbInstances, size(valueSelectionArray,1))
 end
 
+"""
+        evaluate(eval::SameInstancesEvaluator, variableHeuristic::AbstractVariableSelection, strategy::S; verbose::Bool=true) where{S<:SearchStrategy}
+
+Run a search with the given strategy _strategy_ on every evaluation instances for each heuristic.
+"""
 function evaluate(eval::SameInstancesEvaluator, variableHeuristic::AbstractVariableSelection, strategy::S; verbose::Bool=true) where{S<:SearchStrategy}
 
     for j in 1:eval.nbHeuristics
